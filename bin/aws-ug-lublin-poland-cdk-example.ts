@@ -1,25 +1,26 @@
 #!/usr/bin/env node
 import 'source-map-support/register'
 import * as cdk from '@aws-cdk/core'
-import { OneAzVpcStack } from '../lib/one-az-vpc-stack'
-import { InstanceStack } from '../lib/instance-stack'
+import { VpcStack } from '../lib/vpc-stack'
+import { ConsumerInstanceStack } from '../lib/consumer-instance-stack'
 import { VpcEndpointServiceStack } from '../lib/vpc-endpoint-service-stack'
 
 const app = new cdk.App()
 
-const consumerVpc = new OneAzVpcStack(app, 'ConsumerVpc', {
+const cidr = '10.0.0.0/24'
+
+const consumerVpc = new VpcStack(app, 'ConsumerVpc', {
+  cidr,
   name: 'Consumer',
-  cidr: '10.0.0.0/24',
 })
 
-const providerVpc = new OneAzVpcStack(app, 'ProviderVpc', {
+const providerVpc = new VpcStack(app, 'ProviderVpc', {
+  cidr,
   name: 'Provider',
-  cidr: '10.0.1.0/24',
 })
 
-new InstanceStack(app, 'InstanceStack', {
+new ConsumerInstanceStack(app, 'ConsumerInstanceStack', {
   consumerVpc: consumerVpc.vpc,
-  providerVpc: providerVpc.vpc,
 })
 
 new VpcEndpointServiceStack(app, 'VpcEndpointServiceStack', {
