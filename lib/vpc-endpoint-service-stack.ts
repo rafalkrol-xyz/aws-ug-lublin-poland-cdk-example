@@ -14,7 +14,7 @@ export class VpcEndpointServiceStack extends cdk.Stack {
     const exampleFargateService = new ecsPatterns.NetworkLoadBalancedFargateService(this, 'ExampleFargateService', {
       vpc: props.providerVpc,
       taskImageOptions: { image: ecs.ContainerImage.fromRegistry('amazon/amazon-ecs-sample') },
-      publicLoadBalancer: true,
+      publicLoadBalancer: false,
     })
 
     exampleFargateService.service.connections.allowFromAnyIpv4(ec2.Port.tcp(80))
