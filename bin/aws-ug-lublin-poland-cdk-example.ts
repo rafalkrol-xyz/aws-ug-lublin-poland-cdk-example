@@ -25,4 +25,5 @@ new ConsumerInstanceStack(app, 'ConsumerInstanceStack', {
 
 new VpcEndpointServiceStack(app, 'VpcEndpointServiceStack', {
   providerVpc: providerVpc.vpc,
+  consumerVpc: consumerVpc.vpc,
 })
