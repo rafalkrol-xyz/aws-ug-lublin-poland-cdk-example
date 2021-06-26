@@ -17,6 +17,7 @@ export class VpcEndpointServiceStack extends cdk.Stack {
       vpc: props.providerVpc,
       taskImageOptions: { image: ecs.ContainerImage.fromRegistry('amazon/amazon-ecs-sample') },
       publicLoadBalancer: false,
+      listenerPort: 443,
     })
 
     exampleFargateService.service.connections.allowFromAnyIpv4(ec2.Port.tcp(80))
