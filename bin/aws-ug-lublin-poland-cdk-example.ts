@@ -7,15 +7,13 @@ import { VpcEndpointServiceStack } from '../lib/vpc-endpoint-service-stack'
 
 const app = new cdk.App()
 
-const cidr = '10.0.0.0/24'
-
 const consumerVpc = new VpcStack(app, 'ConsumerVpc', {
-  cidr,
+  cidr: '10.0.0.0/24',
   name: 'Consumer',
 })
 
 const providerVpc = new VpcStack(app, 'ProviderVpc', {
-  cidr,
+  cidr: '10.0.1.0/24',
   name: 'Provider',
 })
 
