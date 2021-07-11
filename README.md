@@ -7,9 +7,9 @@ This repository holds the code that was presented by me during [the twelfth meet
 ## Prerequisites
 
 * [an AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/) in which you can interact with the following services:
-  * [VPC]
-  * [EC2]
-  * [ECS]
+  * [VPC](https://aws.amazon.com/vpc)
+  * [EC2](https://aws.amazon.com/ec2)
+  * [ECS](https://aws.amazon.com/ecs)
   * [IAM](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html)
   * [CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html)
   * [CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html)
