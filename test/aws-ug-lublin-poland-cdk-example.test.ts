@@ -3,6 +3,7 @@ import '@aws-cdk/assert/jest'
 import * as ec2 from '@aws-cdk/aws-ec2'
 import { VpcStack } from '../lib/vpc-stack'
 import { ConsumerInstanceStack } from '../lib/consumer-instance-stack'
+import { VpcEndpointServiceStack } from '../lib/vpc-endpoint-service-stack'
 
 describe('A VpcStack', () => {
   const app = new App()
@@ -65,12 +66,60 @@ describe('A ConsumerInstanceStack', () => {
 })
 
 
-test('Empty Stack', () => {
-    const app = new cdk.App();
-    // WHEN
-    const stack = new AwsUgLublinPolandCdkExample.AwsUgLublinPolandCdkExampleStack(app, 'MyTestStack');
-    // THEN
-    expectCDK(stack).to(matchTemplate({
-      "Resources": {}
-    }, MatchStyle.EXACT))
-});
+describe('A VpcEndpointServiceStack', () => {
+  const app = new App()
+  const testVpcStack1 = new VpcStack(app, 'TestVpcStack1', {
+    name: 'Test1',
+    cidr: '10.0.0.0/24',
+  })
+  const testVpcStack2 = new VpcStack(app, 'TestVpcStack2', {
+    name: 'Test1',
+    cidr: '10.0.1.0/24',
+  })
+  const testVpcEndpointServiceStack = new VpcEndpointServiceStack(app, 'TestVpcEndpointServiceStack', {
+    providerVpc: testVpcStack1.vpc,
+    consumerVpc: testVpcStack2.vpc,
+  })
+
+  test('has an internal Network Load Balancer', () => {
+    expect(testVpcEndpointServiceStack).toCountResources('AWS::ElasticLoadBalancingV2::LoadBalancer', 1)
+    expect(testVpcEndpointServiceStack).toHaveResource('AWS::ElasticLoadBalancingV2::LoadBalancer', {
+      'Scheme': 'internal',
+      'Type': 'network',
+    })
+  })
+
+  test('has a Fargate service allowing TCP connections on port 80', () => {
+    expect(testVpcEndpointServiceStack).toCountResources('AWS::ECS::Service', 1)
+    expect(testVpcEndpointServiceStack).toHaveResource('AWS::ECS::Service', {
+      'LaunchType': 'FARGATE',
+    })
+    expect(testVpcEndpointServiceStack).toHaveResource('AWS::EC2::SecurityGroup', {
+      'SecurityGroupIngress': [
+        {
+          'CidrIp': '0.0.0.0/0',
+          'Description': 'from 0.0.0.0/0:80',
+          'FromPort': 80,
+          'ToPort': 80,
+          'IpProtocol': 'tcp',
+        },
+      ],
+    })
+  })
+
+  test('has a VPC Endpoint Service that permits access from one AWS account', () => {
+    expect(testVpcEndpointServiceStack).toCountResources('AWS::EC2::VPCEndpointService', 1)
+    expect(testVpcEndpointServiceStack).toHaveResource('AWS::EC2::VPCEndpointServicePermissions', {
+      'AllowedPrincipals': [
+        `arn:aws:iam::${process.env.CDK_DEFAULT_ACCOUNT}:root`,
+      ],
+    })
+  })
+
+  test('has a VPC Endpoint of type interface', () => {
+    expect(testVpcEndpointServiceStack).toCountResources('AWS::EC2::VPCEndpoint', 1)
+    expect(testVpcEndpointServiceStack).toHaveResource('AWS::EC2::VPCEndpoint', {
+      'VpcEndpointType': 'Interface',
+    })
+  })
+})
